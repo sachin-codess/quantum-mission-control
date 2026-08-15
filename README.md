@@ -1,5 +1,7 @@
 # Quantum Mission Control
 
+**Live demo:** https://quantum-mission-control-ue7h.vercel.app/
+
 A hardware-agnostic benchmarking engine for quantum circuits. It runs a circuit
 across multiple backends — an ideal simulator, a noisy simulator, and real IBM
 quantum hardware — scores each by fidelity, and produces a ranked comparison report.
