@@ -1,0 +1,12 @@
+# Python environments
+qmc-env/
+quantum-engine/
+__pycache__/
+*.pyc
+
+# Secrets — never commit these
+ibm_key.txt
+
+# Real-hardware result (optional to share; keep local for now)
+real_result.json
+ibm_crn.txt
