@@ -1,43 +1,73 @@
 import { useState } from "react";
 import "./App.css";
+import realResult from "./real_result.json";
 
-const API = "http://127.0.0.1:8000";
+// Correct outcomes for a Bell state
+const CORRECT = ["00", "11"];
+const SHOTS = 1000;
+
+// Simulate a Bell state: ideal is 50/50 on 00 and 11.
+// Each backend applies a per-shot error rate that leaks to wrong outcomes.
+function simulate(errorRate) {
+  const counts = { "00": 0, "01": 0, "10": 0, "11": 0 };
+  for (let i = 0; i < SHOTS; i++) {
+    // ideal outcome: 00 or 11, 50/50
+    let outcome = Math.random() < 0.5 ? "00" : "11";
+    // with prob errorRate, flip to a neighboring (wrong) state
+    if (Math.random() < errorRate) {
+      const wrong = ["01", "10"];
+      outcome = wrong[Math.floor(Math.random() * wrong.length)];
+    }
+    counts[outcome]++;
+  }
+  return counts;
+}
+
+function fidelity(counts) {
+  const good = CORRECT.reduce((s, o) => s + (counts[o] || 0), 0);
+  return good / SHOTS;
+}
 
 function App() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [realLoading, setRealLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [notice, setNotice] = useState(null);
 
-  async function runBenchmark() {
+  function runBenchmark() {
     setLoading(true);
-    setError(null);
-    setNotice(null);
-    try {
-      const res = await fetch(`${API}/benchmark`);
-      setData(await res.json());
-    } catch (e) {
-      setError("Could not reach the API. Is the server running on port 8000?");
-    }
-    setLoading(false);
-  }
+    // small delay so the button state reads as "running"
+    setTimeout(() => {
+      const cleanCounts = simulate(0.0);
+      const noisyCounts = simulate(0.015);
 
-  async function runFreshQPU() {
-    setRealLoading(true);
-    setError(null);
-    setNotice("Submitting a fresh job to IBM Quantum. This may queue for minutes...");
-    try {
-      const res = await fetch(`${API}/benchmark/real`, { method: "POST" });
-      const real = await res.json();
-      setNotice(
-        `Fresh QPU run complete on ${real.backend} — fidelity ${(real.fidelity * 100).toFixed(1)}% (job ${real.job_id}). Click Run Benchmark to see it ranked.`
-      );
-    } catch (e) {
-      setError("Fresh QPU run failed. Check the API server logs.");
-      setNotice(null);
-    }
-    setRealLoading(false);
+      const results = [
+        {
+          backend: "clean_sim",
+          fidelity: fidelity(cleanCounts),
+          counts: cleanCounts,
+          shots: SHOTS,
+          type: "simulator",
+        },
+        {
+          backend: "noisy_sim",
+          fidelity: fidelity(noisyCounts),
+          counts: noisyCounts,
+          shots: SHOTS,
+          type: "simulator",
+        },
+        {
+          backend: realResult.backend,
+          fidelity: fidelity(realResult.counts),
+          counts: realResult.counts,
+          shots: realResult.shots,
+          type: "real_qpu",
+          job_id: realResult.job_id,
+        },
+      ];
+
+      results.sort((a, b) => b.fidelity - a.fidelity);
+      setData({ circuit: "Bell State", results });
+      setLoading(false);
+    }, 400);
   }
 
   return (
@@ -49,22 +79,9 @@ function App() {
         </p>
       </header>
 
-      <div className="buttons">
-        <button onClick={runBenchmark} disabled={loading || realLoading}>
-          {loading ? "Running benchmark..." : "Run Benchmark"}
-        </button>
-        <button
-          className="secondary"
-          onClick={runFreshQPU}
-          disabled={loading || realLoading}
-          title="Submits a new job to IBM Quantum. Queue time and quantum runtime may apply."
-        >
-          {realLoading ? "Submitting to QPU..." : "Run Fresh QPU Test"}
-        </button>
-      </div>
-
-      {notice && <p className="notice">{notice}</p>}
-      {error && <p className="error">{error}</p>}
+      <button onClick={runBenchmark} disabled={loading}>
+        {loading ? "Running benchmark..." : "Run Benchmark"}
+      </button>
 
       {data && (
         <div className="results">
@@ -93,6 +110,11 @@ function App() {
           ))}
         </div>
       )}
+
+      <footer className="footer">
+        Simulators run in-browser. Real QPU result captured from IBM hardware —
+        see the repo for the full Qiskit engine and live-hardware code.
+      </footer>
     </div>
   );
 }
