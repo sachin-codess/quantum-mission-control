@@ -1,0 +1,11 @@
+{
+  "backend": "ibm_marrakesh",
+  "job_id": "da0beu50vrcc73bq8slg",
+  "counts": {
+    "00": 479,
+    "11": 498,
+    "10": 13,
+    "01": 10
+  },
+  "shots": 1000
+}
