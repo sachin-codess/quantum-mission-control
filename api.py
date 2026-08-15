@@ -53,3 +53,40 @@ def benchmark():
     # Rank best-first
     results.sort(key=lambda x: x["fidelity"], reverse=True)
     return {"circuit": "Bell State", "results": results}
+
+
+@app.post("/benchmark/real")
+def benchmark_real():
+    """Submit a FRESH job to real IBM hardware. Queues + uses quantum runtime."""
+    import json
+    from qiskit import transpile
+    from qiskit_ibm_runtime import QiskitRuntimeService, SamplerV2
+
+    service = QiskitRuntimeService()
+    backend = service.least_busy(operational=True, simulator=False)
+
+    qc = bell_state()
+    qc_t = transpile(qc, backend=backend, optimization_level=1)
+
+    sampler = SamplerV2(mode=backend)
+    job = sampler.run([qc_t], shots=1000)
+    result = job.result()
+    counts = result[0].data.c.get_counts()
+
+    saved = {
+        "backend": backend.name,
+        "job_id": job.job_id(),
+        "counts": counts,
+        "shots": 1000,
+    }
+    with open("real_result.json", "w") as f:
+        json.dump(saved, f, indent=2)
+
+    correct = ["00", "11"]
+    return {
+        "backend": backend.name,
+        "job_id": job.job_id(),
+        "fidelity": round(fidelity(counts, correct, 1000), 4),
+        "counts": counts,
+        "shots": 1000,
+    }

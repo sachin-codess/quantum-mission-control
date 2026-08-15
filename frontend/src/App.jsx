@@ -1,24 +1,43 @@
 import { useState } from "react";
 import "./App.css";
 
-const API_URL = "http://127.0.0.1:8000/benchmark";
+const API = "http://127.0.0.1:8000";
 
 function App() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [realLoading, setRealLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [notice, setNotice] = useState(null);
 
   async function runBenchmark() {
     setLoading(true);
     setError(null);
+    setNotice(null);
     try {
-      const res = await fetch(API_URL);
-      const json = await res.json();
-      setData(json);
+      const res = await fetch(`${API}/benchmark`);
+      setData(await res.json());
     } catch (e) {
       setError("Could not reach the API. Is the server running on port 8000?");
     }
     setLoading(false);
+  }
+
+  async function runFreshQPU() {
+    setRealLoading(true);
+    setError(null);
+    setNotice("Submitting a fresh job to IBM Quantum. This may queue for minutes...");
+    try {
+      const res = await fetch(`${API}/benchmark/real`, { method: "POST" });
+      const real = await res.json();
+      setNotice(
+        `Fresh QPU run complete on ${real.backend} — fidelity ${(real.fidelity * 100).toFixed(1)}% (job ${real.job_id}). Click Run Benchmark to see it ranked.`
+      );
+    } catch (e) {
+      setError("Fresh QPU run failed. Check the API server logs.");
+      setNotice(null);
+    }
+    setRealLoading(false);
   }
 
   return (
@@ -30,10 +49,21 @@ function App() {
         </p>
       </header>
 
-      <button onClick={runBenchmark} disabled={loading}>
-        {loading ? "Running benchmark..." : "Run Benchmark"}
-      </button>
+      <div className="buttons">
+        <button onClick={runBenchmark} disabled={loading || realLoading}>
+          {loading ? "Running benchmark..." : "Run Benchmark"}
+        </button>
+        <button
+          className="secondary"
+          onClick={runFreshQPU}
+          disabled={loading || realLoading}
+          title="Submits a new job to IBM Quantum. Queue time and quantum runtime may apply."
+        >
+          {realLoading ? "Submitting to QPU..." : "Run Fresh QPU Test"}
+        </button>
+      </div>
 
+      {notice && <p className="notice">{notice}</p>}
       {error && <p className="error">{error}</p>}
 
       {data && (

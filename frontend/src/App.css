@@ -129,3 +129,27 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   font-family: monospace;
   font-size: 0.78rem;
 }
+
+.buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+button.secondary {
+  background: transparent;
+  border: 1px solid var(--qpu);
+  color: var(--qpu);
+}
+
+button.secondary:hover:not(:disabled) {
+  background: rgba(255,107,79,0.1);
+  opacity: 1;
+}
+
+.notice {
+  color: var(--accent);
+  margin-top: 16px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
