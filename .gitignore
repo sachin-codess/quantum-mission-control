@@ -10,3 +10,9 @@ ibm_key.txt
 # Real-hardware result (optional to share; keep local for now)
 real_result.json
 ibm_crn.txt
+
+# Frontend build artifacts — never commit these
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+node_modules/

@@ -1,0 +1,131 @@
+:root {
+  --bg: #0a0e1a;
+  --card: #131a2e;
+  --accent: #4f9cff;
+  --qpu: #ff6b4f;
+  --text: #e6ebf5;
+  --muted: #8a93a8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, system-ui, sans-serif;
+}
+
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+header { margin-bottom: 32px; }
+
+h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  color: var(--muted);
+  margin-top: 8px;
+  font-size: 0.95rem;
+}
+
+button {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+button:hover:not(:disabled) { opacity: 0.9; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.error {
+  color: var(--qpu);
+  margin-top: 16px;
+}
+
+.results { margin-top: 32px; }
+
+.results h2 {
+  font-size: 1.1rem;
+  color: var(--muted);
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.rank {
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.name {
+  font-weight: 600;
+  font-size: 1.05rem;
+  flex: 1;
+}
+
+.tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+
+.tag.simulator { background: rgba(79,156,255,0.15); color: var(--accent); }
+.tag.real_qpu { background: rgba(255,107,79,0.15); color: var(--qpu); }
+
+.bar-track {
+  background: rgba(255,255,255,0.06);
+  border-radius: 6px;
+  height: 10px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  background: linear-gradient(90deg, var(--accent), #6ab0ff);
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.6s ease;
+}
+
+.card-foot {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+
+.job {
+  font-family: monospace;
+  font-size: 0.78rem;
+}
